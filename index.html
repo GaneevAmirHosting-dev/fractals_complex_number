@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Фракталы и комплексные числа</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: #1a1a2e;
+      color: #eaeaea;
+    }
+    h1, h2, h3 {
+      color: #00adb5;
+    }
+    #canvas-container {
+      position: relative;
+      border: 1px solid #ccc;
+      margin: 20px 0;
+      background-color: #0f3460;
+    }
+    .formula {
+      background: #162447;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 15px 0;
+      overflow-x: auto;
+    }
+    button, input, select {
+      padding: 8px 15px;
+      margin: 5px;
+      cursor: pointer;
+      background-color: #00adb5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #009c9a;
+    }
+    #controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    #fractal-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .theory-section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #162447;
+      border-radius: 5px;
+    }
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #00adb5;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .footer-column {
+      display: flex;
+      flex-direction: column;
+    }
+    .footer-column a {
+      color: #eaeaea;
+      text-decoration: none;
+      margin-bottom: 8px;
+    }
+    .footer-column a:hover {
+      color: #00adb5;
+    }
+    .footer-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #00adb5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Секция 1: Введение во фракталы -->
+<div class="theory-section">
+  <h2>Что такое фракталы?</h2>
+  <p>Фракталы — это геометрические объекты с бесконечной самоподобной структурой, где каждая часть повторяет целое в уменьшенном масштабе. Термин был введён Бенуа Мандельбротом в 1975 году. В природе фракталы встречаются повсеместно: береговые линии, снежинки, кровеносные системы и даже галактики.</p>
+  <div class="formula">
+    \[ D = \frac{\log N}{\log s} \]
+    <p>где \( D \) — фрактальная размерность, \( N \) — количество частей, \( s \) — масштабный коэффициент.</p>
+  </div>
+</div>
+
+<!-- Секция 2: История открытия -->
+<div class="theory-section">
+  <h2>История фракталов</h2>
+  <p>Первые примеры фракталов появились ещё в XIX веке (множество Кантора, снежинка Коха), но настоящую революцию совершил Бенуа Мандельброт в 1970-х. Его работа "Фрактальная геометрия природы" показала, что многие природные объекты описываются фрактальными алгоритмами. Интересно, что графическое изображение множества Мандельброта стало возможно только с появлением компьютеров.</p>
+</div>
+
+<!-- Секция 3: Комплексные числа -->
+<div class="theory-section">
+  <h2>Математическая основа</h2>
+  <p>Фракталы Жюлиа и Мандельброта строятся на комплексной плоскости. Комплексное число состоит из действительной и мнимой частей:</p>
+  <div class="formula">
+    \[ z = x + yi \]
+    <p>где \( i \) — мнимая единица (\( i^2 = -1 \)). Умножение комплексных чисел производится по правилу:</p>
+    \[ (a+bi)(c+di) = (ac-bd) + (ad+bc)i \]
+  </div>
+</div>
+
+<!-- Секция 4: Множество Жюлиа -->
+<div class="theory-section">
+  <h2>Множество Жюлиа</h2>
+  <p>Открыто Гастоном Жюлиа и Пьером Фату в 1918 году. Формируется итерацией квадратичного преобразования:</p>
+  <div class="formula">
+    \[ z_{n+1} = z_n^2 + c \]
+  </div>
+  <p>Где \( c \) — комплексная константа. Разные значения \( c \) создают либо связные множества, либо "пыль Жюлиа". Граница множества всегда фрактальна.</p>
+</div>
+
+<!-- Секция 5: Множество Мандельброта -->
+<div class="theory-section">
+  <h2>Множество Мандельброта</h2>
+  <p>Определяется как множество точек \( c \) на комплексной плоскости, для которых последовательность:</p>
+  <div class="formula">
+    \[ z_{n+1} = z_n^2 + c \]
+    <p>при \( z_0 = 0 \) остаётся ограниченной.</p>
+  </div>
+  <p>Это "эталонный" фрактал, содержащий бесконечное количество уменьшенных копий самого себя. Его граница имеет хаусдорфову размерность 2.</p>
+</div>
+
+<!-- Секция 6: Применение фракталов -->
+<div class="theory-section">
+  <h2>Практическое применение</h2>
+  <ul>
+    <li><strong>Компьютерная графика</strong>: генерация ландшафтов, текстур, спецэффектов</li>
+    <li><strong>Телекоммуникации</strong>: фрактальные антенны для компактных устройств</li>
+    <li><strong>Медицина</strong>: анализ пульса, ЭКГ, структуры лёгких</li>
+    <li><strong>Финансы</strong>: моделирование колебаний рынка</li>
+    <li><strong>Сжатие данных</strong>: фрактальное сжатие изображений</li>
+  </ul>
+</div>
+
+<!-- Секция 7: Свойства фракталов -->
+<div class="theory-section">
+  <h2>Ключевые свойства</h2>
+  <ol>
+    <li><strong>Самоподобие</strong>: части повторяют структуру целого</li>
+    <li><strong>Дробная размерность</strong>: размерность не целое число</li>
+    <li><strong>Рекурсивность</strong>: определяются через простые рекурсивные алгоритмы</li>
+    <li><strong>Непрерывность</strong>: при малых изменениях параметров резко меняют структуру</li>
+  </ol>
+  <div class="formula">
+    \[ \text{Пример размерности: } D_{снежинки} \approx 1.2619 \]
+  </div>
+</div>
+
+<!-- Секция 8: Интересные факты -->
+<div class="theory-section">
+  <h2>Интересные факты</h2>
+  <ul>
+    <li>Самое большое изображение Мандельброта (2012) — 9.3 миллиарда пикселей</li>
+    <li>Фракталы используются в защите денежных купюр (евро имеют фрактальные элементы)</li>
+    <li>Кораллы растут по фрактальным алгоритмам</li>
+    <li>Фрактальная антенна в 5 раз компактнее обычной</li>
+  </ul>
+</div>
+
+  <div id="controls">
+    <div>
+      <label for="real-param">Действительная часть (a):</label>
+      <input type="number" id="real-param" step="0.01" value="-0.7">
+    </div>
+    <div>
+      <label for="imag-param">Мнимая часть (b):</label>
+      <input type="number" id="imag-param" step="0.01" value="0.27">
+    </div>
+    <div>
+      <label for="max-iter">Макс. итераций:</label>
+      <input type="number" id="max-iter" value="100" min="10" max="500">
+    </div>
+    <div>
+      <label for="color-scheme">Цветовая схема:</label>
+      <select id="color-scheme">
+        <option value="classic">Классическая</option>
+        <option value="rainbow">Радуга</option>
+        <option value="fire">Огонь</option>
+      </select>
+    </div>
+    <button id="draw-btn" onclick="drawFractal()">Нарисовать</button>
+  </div>
+
+  <div id="canvas-container"></div>
+  
+  <div style="text-align: center; margin: 10px 0;">
+    <button onclick="resetView()">Сбросить вид</button>
+    <p>Клик на изображении: ЛКМ - приблизить | ПКМ - отдалить</p>
+  </div>
+
+  <h2>Популярные варианты</h2>
+  <div id="fractal-gallery">
+    <button onclick="loadPreset('julia1')">Жюлиа (-0.7, 0.27)</button>
+    <button onclick="loadPreset('julia2')">Жюлиа (-0.4, 0.6)</button>
+    <button onclick="loadPreset('julia3')">Жюлиа (0.285, 0.01)</button>
+    <button onclick="loadPreset('julia4')">Жюлиа (-0.8, 0.156)</button>
+    <button onclick="loadPreset('mandelbrot')">Мандельброт</button>
+  </div>
+
+  <footer>
+    <div class="footer-column">
+      <div class="footer-title">О НАС</div>
+      <a>©2025-2025</a>
+      <a>Все данные защищены</a>
+      <a>Ganeev Amir, Hero Nikita</a>
+
+    </div>
+    <div class="footer-column">
+      <div class="footer-title">НАШИ ПРОЕКТЫ</div>
+      <a href=" https://ganeevamirhosting-dev.github.io/Geometry-test/">Geometry collection</a>
+      <a href=" https://ganeevamirhosting-dev.github.io/physics-formuls/">Physic collection</a>
+      <a href="#">coming soon...</a>
+    </div>
+    <div class="footer-column">
+  <div class="footer-title">СВЯЗЬ</div>
+  <a>Если нашли ошибку или хотите, чтобы на сайте появилась новая информация, напишите</a>
+  <form id="contactForm" action="mailto:siveixe@gmail.com" method="post" enctype="text/plain">
+    <button type="submit">Отправить сообщение</button>
+  </form>
+</div>
+    
+  </footer>
+
+  <script>
+    let zoom = 1;
+    let offsetX = 0, offsetY = 0;
+    let maxIterations = 100;
+    let colorScheme = 'classic';
+    let realParam = 0;
+    let imagParam = 0;
+    let canvas;
+
+    const presets = {
+      julia1: { real: -0.7, imag: 0.27 },
+      julia2: { real: -0.4, imag: 0.6 },
+      julia3: { real: 0.285, imag: 0.01 },
+      julia4: { real: -0.8, imag: 0.156 },
+      mandelbrot: { real: 0, imag: 0 }
+    };
+
+    function setup() {
+      canvas = createCanvas(600, 600);
+      canvas.parent('canvas-container');
+      pixelDensity(1);
+      drawFractal();
+    }
+
+    function drawFractal() {
+      realParam = parseFloat(document.getElementById('real-param').value) || 0;
+      imagParam = parseFloat(document.getElementById('imag-param').value) || 0;
+      maxIterations = parseInt(document.getElementById('max-iter').value) || 100;
+      colorScheme = document.getElementById('color-scheme').value;
+      
+      const isMandelbrot = (realParam === 0 && imagParam === 0);
+      
+      loadPixels();
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          let a = map(x, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+          let b = map(y, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+          
+          let n = 0;
+          let za, zb, ca, cb;
+          
+          if (isMandelbrot) {
+            za = 0;
+            zb = 0;
+            ca = a;
+            cb = b;
+          } else {
+            za = a;
+            zb = b;
+            ca = realParam;
+            cb = imagParam;
+          }
+          
+          while (n < maxIterations) {
+            const aa = za * za - zb * zb;
+            const bb = 2 * za * zb;
+            za = aa + ca;
+            zb = bb + cb;
+            
+            if (za * za + zb * zb > 4) break;
+            n++;
+          }
+          
+          setPixelColor(x, y, n);
+        }
+      }
+      updatePixels();
+    }
+
+    function setPixelColor(x, y, n) {
+      const pix = (x + y * width) * 4;
+      
+      if (n === maxIterations) {
+        pixels[pix] = 0;
+        pixels[pix + 1] = 0;
+        pixels[pix + 2] = 0;
+      } else {
+        const t = map(n, 0, maxIterations, 0, 1);
+        
+        switch(colorScheme) {
+          case 'rainbow':
+            pixels[pix] = sin(t * TWO_PI + 0) * 127 + 128;
+            pixels[pix + 1] = sin(t * TWO_PI + 2) * 127 + 128;
+            pixels[pix + 2] = sin(t * TWO_PI + 4) * 127 + 128;
+            break;
+          case 'fire':
+            pixels[pix] = t * 255;
+            pixels[pix + 1] = t * t * 180;
+            pixels[pix + 2] = t * t * t * 60;
+            break;
+          default:
+            pixels[pix] = t * 255;
+            pixels[pix + 1] = t * 180;
+            pixels[pix + 2] = t * 60;
+        }
+      }
+      pixels[pix + 3] = 255;
+    }
+
+    function mousePressed() {
+      if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
+      
+      if (mouseButton === LEFT) {
+        zoom *= 2;
+        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+      } else if (mouseButton === RIGHT) {
+        zoom *= 0.5;
+        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+      }
+      drawFractal();
+    }
+
+    function loadPreset(presetName) {
+      const preset = presets[presetName];
+      document.getElementById('real-param').value = preset.real;
+      document.getElementById('imag-param').value = preset.imag;
+      resetView();
+    }
+
+    function resetView() {
+      zoom = 1;
+      offsetX = 0;
+      offsetY = 0;
+      drawFractal();
+    }
+  </script>
+</body>
+</html>
+
+
+
+
