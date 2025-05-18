@@ -241,6 +241,7 @@
   </footer>
 
   <script>
+
     let zoom = 1;
     let offsetX = 0, offsetY = 0;
     let maxIterations = 100;
@@ -248,6 +249,9 @@
     let realParam = 0;
     let imagParam = 0;
     let canvas;
+    let lastTouchTime = 0;
+    let touchCount = 0;
+    let initialDistance = 0;
 
     const presets = {
       julia1: { real: -0.7, imag: 0.27 },
@@ -262,7 +266,91 @@
       canvas.parent('canvas-container');
       pixelDensity(1);
       drawFractal();
+      
+      // Добавляем обработчики для сенсорных устройств
+      canvas.elt.addEventListener('touchstart', handleTouchStart, {passive: false});
+      canvas.elt.addEventListener('touchmove', handleTouchMove, {passive: false});
+      canvas.elt.addEventListener('touchend', handleTouchEnd);
     }
+
+    function handleTouchStart(e) {
+      e.preventDefault();
+      const now = Date.now();
+      
+      // Определяем двойное касание
+      if (now - lastTouchTime < 300 && e.touches.length === 1) {
+        // Двойное касание - отдаление
+        zoom *= 0.5;
+        offsetX = map(e.touches[0].clientX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(e.touches[0].clientY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+        drawFractal();
+      }
+      else if (e.touches.length === 2) {
+        // Pinch-жест - запоминаем начальное расстояние
+        initialDistance = dist(
+          e.touches[0].clientX, e.touches[0].clientY,
+          e.touches[1].clientX, e.touches[1].clientY
+        );
+      }
+      
+      lastTouchTime = now;
+      touchCount = e.touches.length;
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      
+      if (e.touches.length === 2) {
+        // Вычисляем текущее расстояние между пальцами
+        const currentDistance = dist(
+          e.touches[0].clientX, e.touches[0].clientY,
+          e.touches[1].clientX, e.touches[1].clientY
+        );
+        
+        // Масштабируем
+        const scaleFactor = currentDistance / initialDistance;
+        zoom *= 1/scaleFactor;
+        initialDistance = currentDistance;
+        
+        // Центрируем по среднему положению пальцев
+        const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        
+        offsetX = map(centerX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(centerY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+        
+        drawFractal();
+      }
+    }
+
+    function handleTouchEnd(e) {
+      if (touchCount === 1 && e.touches.length === 0) {
+        // Одиночное касание - приближение
+        const touch = e.changedTouches[0];
+        zoom *= 2;
+        offsetX = map(touch.clientX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(touch.clientY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+        drawFractal();
+      }
+    }
+
+    function mousePressed() {
+      if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
+      
+      if (mouseButton === LEFT) {
+        zoom *= 2;
+        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+      } else if (mouseButton === RIGHT) {
+        zoom *= 0.5;
+        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
+        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
+      }
+      drawFractal();
+    }
+
+
+
 
     function drawFractal() {
       realParam = parseFloat(document.getElementById('real-param').value) || 0;
@@ -339,20 +427,7 @@
       pixels[pix + 3] = 255;
     }
 
-    function mousePressed() {
-      if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
-      
-      if (mouseButton === LEFT) {
-        zoom *= 2;
-        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
-        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
-      } else if (mouseButton === RIGHT) {
-        zoom *= 0.5;
-        offsetX = map(mouseX, 0, width, -2 / zoom + offsetX, 2 / zoom + offsetX);
-        offsetY = map(mouseY, 0, height, -2 / zoom + offsetY, 2 / zoom + offsetY);
-      }
-      drawFractal();
-    }
+
 
     function loadPreset(presetName) {
       const preset = presets[presetName];
